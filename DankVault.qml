@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Common
 import qs.Services
 
 QtObject {
@@ -153,7 +154,29 @@ QtObject {
         trigger = pluginService.loadPluginData(pluginId, "trigger", "@");
         defaultAction = pluginService.loadPluginData(pluginId, "defaultAction", "password");
         backend = pluginService.loadPluginData(pluginId, "backend", "auto");
+        _applyTriggerOnlyVisibilityDefault();
         _resolveBackend();
+    }
+
+    function _applyTriggerOnlyVisibilityDefault() {
+        if (!pluginService)
+            return;
+        if (typeof SettingsData === "undefined"
+            || typeof SettingsData.getPluginAllowWithoutTrigger !== "function"
+            || typeof SettingsData.setPluginAllowWithoutTrigger !== "function")
+            return;
+
+        var applied = pluginService.loadPluginData(pluginId, "triggerOnlyVisibilityDefaultApplied", false);
+        if (applied === true || applied === "true")
+            return;
+
+        var visibility = SettingsData.launcherPluginVisibility || ({});
+        var hasVisibilityChoice = visibility[pluginId] !== undefined
+            && visibility[pluginId].allowWithoutTrigger !== undefined;
+
+        if (!hasVisibilityChoice && SettingsData.getPluginAllowWithoutTrigger(pluginId))
+            SettingsData.setPluginAllowWithoutTrigger(pluginId, false);
+        pluginService.savePluginData(pluginId, "triggerOnlyVisibilityDefaultApplied", true);
     }
 
     function _resolveBackend() {

@@ -166,6 +166,28 @@ else
     fail "clipboard" "does not use positional arg pattern"
 fi
 
+# ── launcher activation behavior ────────────────────────────────────
+
+echo "launcher activation"
+
+if grep -q 'import qs.Common' DankVault.qml; then
+    pass "imports SettingsData access"
+else
+    fail "launcher activation" "missing qs.Common import"
+fi
+
+if grep -q 'triggerOnlyVisibilityDefaultApplied' DankVault.qml; then
+    pass "records one-time trigger-only visibility default"
+else
+    fail "launcher activation" "missing trigger-only migration flag"
+fi
+
+if grep -q 'setPluginAllowWithoutTrigger(pluginId, false)' DankVault.qml; then
+    pass "opts out of All mode by default"
+else
+    fail "launcher activation" "does not disable allowWithoutTrigger"
+fi
+
 # ── auto-detection command ───────────────────────────────────────────
 
 echo "backend auto-detection"
