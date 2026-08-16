@@ -69,7 +69,7 @@ QtObject {
                     var parts = path.split("/");
                     var name = parts[parts.length - 1];
                     var folder = parts.length > 1 ? parts.slice(0, -1).join("/") : "";
-                    entries.push({ name: name, user: "", folder: folder });
+                    entries.push({ id: path, name: name, user: "", folder: folder });
                 }
                 return entries;
             },
@@ -100,7 +100,7 @@ QtObject {
                     var parts = path.split("/");
                     var name = parts[parts.length - 1];
                     var folder = parts.length > 1 ? parts.slice(0, -1).join("/") : "";
-                    entries.push({ name: name, user: "", folder: folder });
+                    entries.push({ id: path, name: name, user: "", folder: folder });
                 }
                 return entries;
             },
@@ -289,7 +289,8 @@ QtObject {
                     display = entry.folder + "/" + entry.name;
 
                 var comment = entry.user || "No username";
-                var entryRef = entry.name + "\t" + entry.user;
+                var entryId = entry.id || entry.name;
+                var entryRef = entryId + "\t" + entry.user;
 
                 results.push({
                     name: display,
