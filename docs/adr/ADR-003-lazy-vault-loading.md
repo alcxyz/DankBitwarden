@@ -10,11 +10,15 @@ DankVault called `refreshEntries()` during component initialization (`Component.
 
 This is poor UX — the shell blocks on a password prompt the user didn't ask for.
 
+DMS can also ask launcher plugins for items in "All" mode without the plugin trigger. For cheap launchers that is useful, but for a password vault it can still run `rbw list` before the user types `@`.
+
 ## Decision
 
-Defer `refreshEntries()` until `getItems()` is first called, which only happens when the user activates the plugin by typing the trigger key. Backend detection still runs on init (it's lightweight — just `command -v` checks), but the vault query is lazy.
+Defer `refreshEntries()` until `getItems()` is first called. Backend detection still runs on init (it's lightweight — just `command -v` checks), but the vault query is lazy.
 
 A `_needsRefresh` flag is set during backend resolution and consumed on the first `getItems()` call.
+
+DankVault also opts out of DMS launcher "All" mode once on plugin load by setting `allowWithoutTrigger` to `false` when no explicit visibility choice exists yet. Triggered use still works because DMS strips the trigger and passes the remaining query to `getItems()`. The opt-out is recorded with `triggerOnlyVisibilityDefaultApplied` so a user can intentionally re-enable "All" mode later without the plugin resetting their choice every restart.
 
 ## Alternatives Considered
 
@@ -24,7 +28,8 @@ A `_needsRefresh` flag is set during backend resolution and consumed on the firs
 
 ## Consequences
 
-- No vault-related prompts on DMS startup.
+- No vault-related prompts on DMS startup or normal launcher open.
 - First use of the plugin after launch shows a brief "Loading vault..." state.
 - If the vault is locked, the PIN/password prompt appears when the user actually wants to use the vault, not before.
 - `refreshEntries()` is still callable for manual refresh (e.g. retry on error).
+- Users who intentionally re-enable "All" mode can still make DankVault searchable without typing the trigger.

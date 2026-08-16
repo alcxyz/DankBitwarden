@@ -46,6 +46,8 @@ Activate with `@` (default trigger) in the DMS launcher, then:
 - Select an entry to copy the default field (password)
 - Right-click for options: copy password, username, or TOTP
 
+DankVault hides itself from DMS "All" mode by default so opening the launcher or typing unrelated searches does not prompt to unlock your vault. Use the configured trigger prefix to activate it.
+
 ## Supported backends
 
 | Backend | Package | Notes |

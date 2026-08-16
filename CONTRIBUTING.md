@@ -32,11 +32,27 @@ dms ipc call plugins reload dankVault
 Backends are defined in the `_backends` map inside `DankVault.qml`. Each backend provides:
 
 - `listCommand()` — returns a command array to list entries
-- `parseListOutput(text)` — parses stdout into `[{name, user, folder}]`
-- `getFieldCommand(entryName, entryUser, fieldName)` — returns a command array to get a field value
+- `parseListOutput(text)` — parses stdout into `[{id, name, user, folder}]`; `id` is optional when `name` is already the backend's canonical lookup key
+- `getFieldCommand(entryName, entryUser, fieldName)` — returns a command array to get a field value; `entryName` receives `id` when the parsed entry provides one
 - `errorHint` — help text shown when the backend fails
 
 Add a new entry to `_backends`, a detection entry in `detectProcess`, and a settings option in `DankVaultSettings.qml`.
+
+## Testing
+
+Run the fast source and parsing checks directly:
+
+```bash
+./test.sh
+```
+
+Run the real `pass` and `gopass` nested-entry integration test with disposable GPG and password-store directories:
+
+```bash
+nix-shell -p gnupg pass gopass --run ./test-integration.sh
+```
+
+The integration test redirects GPG, password-store, XDG, and Git configuration into a temporary directory and removes it on exit.
 
 ## Making changes
 

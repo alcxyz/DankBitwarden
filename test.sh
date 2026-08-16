@@ -80,8 +80,10 @@ PASS_OUTPUT=$(printf 'email/github\nemail/gitlab\nssh/server1\nbank\n')
 
 # Simulate: split on /, last part = name, rest = folder
 LINE1=$(echo "$PASS_OUTPUT" | sed -n '1p')
+PASS_ID="$LINE1"
 PASS_NAME=$(echo "$LINE1" | awk -F/ '{print $NF}')
 PASS_FOLDER=$(echo "$LINE1" | awk -F/ '{NF--; print}' OFS=/)
+assert_eq "pass entry id preserves full path" "email/github" "$PASS_ID"
 assert_eq "pass entry name" "github" "$PASS_NAME"
 assert_eq "pass entry folder" "email" "$PASS_FOLDER"
 
@@ -116,10 +118,24 @@ echo "gopass backend: parse list output"
 GOPASS_OUTPUT=$(printf 'email/github\nemail/gitlab\nmisc/wifi\n')
 
 LINE1=$(echo "$GOPASS_OUTPUT" | sed -n '1p')
+GOPASS_ID="$LINE1"
 GP_NAME=$(echo "$LINE1" | awk -F/ '{print $NF}')
 GP_FOLDER=$(echo "$LINE1" | awk -F/ '{NF--; print}' OFS=/)
+assert_eq "gopass entry id preserves full path" "email/github" "$GOPASS_ID"
 assert_eq "gopass entry name" "github" "$GP_NAME"
 assert_eq "gopass entry folder" "email" "$GP_FOLDER"
+
+echo "nested entry command routing"
+
+PASS_BACKEND=$(sed -n '/"pass": {/,/"gopass": {/p' DankVault.qml)
+GOPASS_BACKEND=$(sed -n '/"gopass": {/,/"op": {/p' DankVault.qml)
+
+assert_contains "pass parser stores canonical path" \
+    'entries.push({ id: path, name: name, user: "", folder: folder });' "$PASS_BACKEND"
+assert_contains "gopass parser stores canonical path" \
+    'entries.push({ id: path, name: name, user: "", folder: folder });' "$GOPASS_BACKEND"
+assert_contains "actions prefer canonical entry id" \
+    'var entryId = entry.id || entry.name;' "$(sed -n '/function getItems/,/function executeItem/p' DankVault.qml)"
 
 # ── op output parsing ────────────────────────────────────────────────
 
@@ -164,6 +180,28 @@ if grep -qF '$1' DankVault.qml; then
     pass "uses positional arg for secret value"
 else
     fail "clipboard" "does not use positional arg pattern"
+fi
+
+# ── launcher activation behavior ────────────────────────────────────
+
+echo "launcher activation"
+
+if grep -q 'import qs.Common' DankVault.qml; then
+    pass "imports SettingsData access"
+else
+    fail "launcher activation" "missing qs.Common import"
+fi
+
+if grep -q 'triggerOnlyVisibilityDefaultApplied' DankVault.qml; then
+    pass "records one-time trigger-only visibility default"
+else
+    fail "launcher activation" "missing trigger-only migration flag"
+fi
+
+if grep -q 'setPluginAllowWithoutTrigger(pluginId, false)' DankVault.qml; then
+    pass "opts out of All mode by default"
+else
+    fail "launcher activation" "does not disable allowWithoutTrigger"
 fi
 
 # ── auto-detection command ───────────────────────────────────────────
