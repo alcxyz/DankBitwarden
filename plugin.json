@@ -2,7 +2,7 @@
     "id": "dankVault",
     "name": "Vault",
     "description": "Search and copy passwords from your vault via rbw, pass, gopass, or op",
-    "version": "0.3.3",
+    "version": "0.4.0",
     "author": "alcxyz",
     "icon": "lock",
     "type": "launcher",
