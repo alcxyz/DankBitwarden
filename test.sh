@@ -159,6 +159,13 @@ assert_contains "password field uses label=" "label=password" \
 assert_contains "username field uses label=" "label=username" \
     "op item get TestEntry --fields label=username"
 
+# Concealed fields (passwords) return a placeholder unless --reveal is passed
+if grep -q '"--fields", "label=" + fieldName, "--reveal"' DankVault.qml; then
+    pass "op --fields passes --reveal"
+else
+    fail "op reveal" "op --fields is missing --reveal; concealed fields yield a placeholder"
+fi
+
 # ── clipboard command safety ─────────────────────────────────────────
 
 echo "clipboard security"

@@ -142,7 +142,7 @@ QtObject {
             getFieldCommand: function(entryName, entryUser, fieldName) {
                 if (fieldName === "totp")
                     return ["op", "item", "get", entryName, "--otp"];
-                return ["op", "item", "get", entryName, "--fields", "label=" + fieldName];
+                return ["op", "item", "get", entryName, "--fields", "label=" + fieldName, "--reveal"];
             },
             errorHint: "Are you signed in? (op signin)"
         }
